@@ -1,13 +1,16 @@
 package fr.brizeos.gestehpad;
 
+import fr.brizeos.gestehpad.bll.BaseManager;
 import fr.brizeos.gestehpad.bll.hebergement.HebergementManager;
 import fr.brizeos.gestehpad.bll.patient.PatientManager;
+import fr.brizeos.gestehpad.bo.hebergement.activite.Contrat;
+import fr.brizeos.gestehpad.bo.hebergement.activite.Employe;
+import fr.brizeos.gestehpad.bo.hebergement.activite.Planning;
 import fr.brizeos.gestehpad.bo.hebergement.info.Chambre;
 import fr.brizeos.gestehpad.bo.hebergement.info.Hebergement;
 import fr.brizeos.gestehpad.bo.hebergement.info.Ville;
 import fr.brizeos.gestehpad.bo.patient.Patient;
-import fr.brizeos.gestehpad.dal.ChambreRepository;
-import fr.brizeos.gestehpad.dal.VilleRepository;
+import fr.brizeos.gestehpad.dal.BaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -25,28 +28,38 @@ public class GestEhpadApplication implements CommandLineRunner{
     }
 
     @Autowired
-    PatientManager patientRepository;
+    BaseRepository repository;
+
     @Autowired
-    VilleRepository villeRepository;
-    @Autowired
-    ChambreRepository chambreRepository;
-    @Autowired
-    HebergementManager hebergementRepository;
+    BaseManager manager;
 
     @Override
     public void run(String... args) throws Exception {
+        Planning planing1 = Planning.builder().build();
+        repository.save(planing1);
+
+
+        Contrat contrat1 = Contrat.builder().labelContrat("35h/semaine").planing(planing1).build();
+        Employe e1 = Employe.builder()
+                .nomEmploye("Pinho")
+                .prenomEmploye("Jonathan")
+                .dateNaissanceEmploye(LocalDate.of(1992,12, 11))
+                .contrat(null)
+                .build();
+        repository.save(e1);
+
         Ville ville = Ville.builder().nomVille("Quimper").codePostalVille("29000").build();
-        villeRepository.save(ville);
+        repository.save(ville);
 
         Chambre chambre = Chambre.builder().numeroChambre(103).surfaceChambre(63.2).maxResidentChambre(2).patientsChambre(new ArrayList<>()).build();
-        chambreRepository.save(chambre);
+        repository.save(chambre);
 
         Hebergement h = Hebergement.builder()
                 .nomHebergement("Résidence pasepais")
                 .villeHebergement(ville)
                 .chambresHebergement(List.of(chambre))
                 .build();
-        hebergementRepository.add(h);
+        manager.add(h);
 
         Patient p1 = Patient.builder()
                 .nomPatient("DeLaQuenelle")
@@ -56,9 +69,11 @@ public class GestEhpadApplication implements CommandLineRunner{
                 .dateNaissancePatient(LocalDate.of(1956, 3, 12))
                 .build();
         p1.setChambrePatient(chambre);
-        patientRepository.add(p1);
+        manager.add(p1);
 
         System.out.println("p1 = " + p1);
+
+//        manager.findBy(Patient.class, "nom", "=", "PINHO");
 
     }
 }

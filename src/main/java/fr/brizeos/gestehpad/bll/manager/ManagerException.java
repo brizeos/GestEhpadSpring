@@ -1,7 +1,7 @@
 package fr.brizeos.gestehpad.bll.manager;
 
 public class ManagerException extends Exception {
-    public ManagerException(Exception e) {
+    public ManagerException(String e) {
         super(e);
     }
 }
